@@ -1,55 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beast Study Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; display: flex; }
-        #sidebar { width: 200px; padding: 20px; border-right: 1px solid #ccc; }
-        #main { flex-grow: 1; padding: 20px; }
-        .q-box { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px; }
-        input { width: 100%; padding: 8px; margin-top: 5px; }
+        /* Smooth transitions for the sidebar */
+        #sidebar { transition: width 0.3s ease; }
+        .sidebar-closed { width: 0px !important; overflow: hidden; }
     </style>
 </head>
-<body>
-    <div id="sidebar">
-        <h3>Subjects</h3>
-        <div onclick="loadChapters('Maths')">Mathematics</div>
-        <div id="chapter-list"></div>
+<body class="bg-gray-50 text-gray-900 font-sans flex h-screen overflow-hidden">
+
+    <div id="sidebar" class="w-64 bg-white border-r border-gray-200 shadow-lg flex-shrink-0">
+        <div class="p-6">
+            <h1 class="text-2xl font-extrabold tracking-wide text-blue-600 mb-6">BEAST HUB</h1>
+            <nav class="space-y-2">
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Computer</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Physics</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Biology</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Chemistry</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">History</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">English 1</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">English 2</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Mathematics</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Kannada</button>
+                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Geography</button>
+            </nav>
+        </div>
     </div>
-    <div id="main">
-        <select id="chapter-select" multiple></select>
-        <button onclick="generate()">Generate Test</button>
-        <div id="test-area"></div>
+
+    <div class="flex-1 flex flex-col w-full">
+        
+        <header class="h-16 flex items-center justify-between px-6 bg-white border-b border-gray-200 shadow-sm">
+            <button id="menu-btn" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg border border-gray-200">
+                <button id="sat-btn" class="px-5 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white shadow">
+                    SAT (25 Marks)
+                </button>
+                <button id="tat-btn" class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-600 hover:text-gray-900">
+                    TAT (80 Marks)
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-10 bg-gray-50">
+            <div class="max-w-5xl mx-auto">
+                <div class="bg-white border border-gray-200 p-10 rounded-2xl shadow-sm">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6" id="status-title">Select a subject to begin.</h2>
+                    <p class="text-gray-600 text-lg leading-relaxed mb-8" id="intro-text">
+                        Your custom test questions will generate here based on the files in your data folder.
+                    </p>
+                    
+                    <div id="question-area" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-        function loadChapters(subject) {
-            // Add your logic to fetch filenames from your /data/subject folder here
-            document.getElementById('chapter-select').innerHTML = 
-                '<option value="all">All Chapters</option><option value="ch1.pdf">Chapter 1</option>';
-        }
+        // Toggle Sidebar
+        const sidebar = document.getElementById('sidebar');
+        const menuBtn = document.getElementById('menu-btn');
+        menuBtn.addEventListener('click', () => { sidebar.classList.toggle('sidebar-closed'); });
 
-        async function generate() {
-            const subject = "Maths";
-            const chapters = Array.from(document.getElementById('chapter-select').selectedOptions).map(o => o.value);
-            
-            document.getElementById('test-area').innerText = "Generating...";
-            
-            const response = await fetch('/api/generate_test', {
-                method: 'POST',
-                body: JSON.stringify({ subject, chapters })
+        // Toggle Test Buttons
+        let currentTestType = 'SAT';
+        const satBtn = document.getElementById('sat-btn');
+        const tatBtn = document.getElementById('tat-btn');
+
+        satBtn.addEventListener('click', () => {
+            currentTestType = 'SAT';
+            satBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white shadow";
+            tatBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold text-gray-600 hover:text-gray-900";
+        });
+
+        tatBtn.addEventListener('click', () => {
+            currentTestType = 'TAT';
+            tatBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white shadow";
+            satBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold text-gray-600 hover:text-gray-900";
+        });
+
+        // Trigger AI when you click a subject
+        const subjectButtons = document.querySelectorAll('nav button');
+        const questionArea = document.getElementById('question-area');
+        const statusTitle = document.getElementById('status-title');
+        const introText = document.getElementById('intro-text');
+
+        subjectButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const subject = button.innerText;
+                statusTitle.innerText = `Generating ${subject} ${currentTestType} Exam...`;
+                introText.style.display = 'none'; // Hide the intro text
+                questionArea.innerHTML = `<p class="text-blue-600 font-bold text-lg animate-pulse">Communicating with AI, please wait...</p>`;
+
+                try {
+                    // Send request to Python backend
+                    const response = await fetch('/api/generate_test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ subject: subject, type: currentTestType })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    // Clear loading text and display real questions
+                    statusTitle.innerText = `${subject} Test Ready`;
+                    questionArea.innerHTML = ''; 
+                    
+                    data.questions.forEach((item, index) => {
+                        // We use a small hack to pass the AI's explanation safely into the button click
+                        const encodedExplanation = encodeURIComponent(item.a);
+                        
+                        questionArea.innerHTML += `
+                        <div class="p-6 bg-blue-50 rounded-xl border border-blue-100 flex justify-between items-start">
+                            <p class="text-xl font-medium text-gray-800 w-3/4">
+                                ${index + 1}. ${item.q}
+                            </p>
+                            <button onclick="alert(decodeURIComponent('${encodedExplanation}'))" class="bg-blue-100 text-blue-700 font-bold py-2 px-6 rounded-lg hover:bg-blue-200 border border-blue-200 transition-colors">
+                                Explain AI
+                            </button>
+                        </div>`;
+                    });
+                } catch (error) {
+                    questionArea.innerHTML = `<p class="text-red-600 font-bold">Error loading AI. Make sure your Python backend is connected and your API key is set in Vercel.</p>`;
+                }
             });
-            const data = await response.json();
-            
-            let html = "";
-            data.questions.forEach((item, index) => {
-                html += `<div class="q-box">
-                    <p>${index+1}. ${item.q}</p>
-                    <input type="text" placeholder="Type your answer here...">
-                </div>`;
-            });
-            document.getElementById('test-area').innerHTML = html;
-        }
+        });
     </script>
 </body>
 </html>
