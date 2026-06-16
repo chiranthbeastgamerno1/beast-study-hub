@@ -12,104 +12,67 @@
             --card-border: #e5e7eb;
             --primary: #4f46e5;
             --text-dark: #1f2937;
-            --text-light: #6b7280;
         }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body { display: flex; height: 100vh; background-color: var(--bg-color); overflow: hidden; }
-
-        /* Sidebar Styling */
+        
+        /* Sidebar */
         .sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; padding: 20px 0; }
         .logo { display: flex; align-items: center; padding: 0 20px 30px 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-        .logo span { font-size: 28px; margin-right: 10px; }
-        .nav-title { font-size: 12px; color: #a5b4fc; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px; margin-bottom: 10px; }
-        
-        .nav-item { display: flex; align-items: center; padding: 12px 20px; margin: 4px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: #e0e7ff; }
+        .nav-item { padding: 12px 20px; margin: 4px 12px; border-radius: 8px; cursor: pointer; color: #e0e7ff; transition: 0.2s; }
         .nav-item:hover { background-color: var(--sidebar-hover); }
-        .nav-item.active { background-color: white; color: var(--sidebar-bg); font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .nav-item span { margin-right: 12px; font-size: 18px; }
-
-        .footer-note { margin-top: auto; padding: 20px; font-size: 12px; color: #a5b4fc; text-align: center; }
-
-        /* Main Content Styling */
-        .main-content { flex: 1; overflow-y: auto; padding: 40px; }
-        .header { margin-bottom: 30px; }
-        .header h1 { color: var(--text-dark); font-size: 28px; }
-
-        /* Cards */
-        .card { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
-        .setup-header { background: #fffbeb; border: 1px solid #fde68a; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px; display: flex; align-items: center; color: #92400e; }
-        .setup-header span { font-size: 24px; margin-right: 15px; }
-
-        /* Form Elements */
-        label { display: block; font-weight: 600; color: var(--text-dark); margin-bottom: 10px; }
-        select { width: 100%; padding: 12px; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 20px; outline: none; }
-        button { background-color: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 16px; }
-        button:hover { background-color: #4338ca; }
-        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
-
-        /* Test Area */
-        .q-box { border-top: 1px solid var(--card-border); padding-top: 25px; margin-top: 25px; }
-        .q-text { font-size: 18px; color: var(--text-dark); margin-bottom: 15px; font-weight: 500; }
-        textarea { width: 100%; height: 150px; padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 15px; resize: vertical; margin-bottom: 15px; outline-color: var(--primary); background: #f9fafb; }
+        .nav-item.active { background-color: white; color: var(--sidebar-bg); font-weight: 600; }
         
-        .ans-btn { background-color: #f3f4f6; color: var(--text-dark); border: 1px solid var(--card-border); }
-        .ans-btn:hover { background-color: #e5e7eb; }
-        .ans-key { display: none; margin-top: 15px; padding: 15px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; color: #065f46; line-height: 1.5; }
+        /* Main */
+        .main-content { flex: 1; overflow-y: auto; padding: 40px; }
+        .card { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 30px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        select { width: 100%; padding: 12px; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 20px; outline: none; }
+        .btn-primary { background-color: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .btn-primary:disabled { background-color: #9ca3af; cursor: not-allowed; }
+        
+        /* Questions */
+        .q-box { border-top: 1px solid var(--card-border); padding-top: 25px; margin-top: 25px; }
+        .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .q-text { font-size: 18px; color: var(--text-dark); font-weight: 500; }
+        .q-marks { background: #e0e7ff; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 14px; font-weight: bold; white-space: nowrap; margin-left: 15px; }
+        
+        /* MCQ Buttons */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .mcq-btn { background: #f9fafb; border: 2px solid #e5e7eb; padding: 12px; border-radius: 8px; text-align: left; cursor: pointer; font-size: 15px; transition: 0.2s; }
+        .mcq-btn:hover { border-color: #cbd5e1; }
+        .mcq-btn.selected { background: #eef2ff; border-color: var(--primary); color: var(--primary); font-weight: 600; }
+        
+        /* Subjective / Math Area */
+        textarea { width: 100%; height: 120px; padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: monospace; resize: vertical; margin-bottom: 15px; }
+        .ans-btn { background-color: #f3f4f6; color: var(--text-dark); border: 1px solid var(--card-border); padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .ans-key { display: none; margin-top: 15px; padding: 15px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; color: #065f46; }
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
-        <div class="logo">
-            <span>🦁</span>
-            <div>
-                <div>Beast Study</div>
-                <div style="font-size: 12px; font-weight: normal; color: #a5b4fc;">Hub</div>
-            </div>
-        </div>
-        <div class="nav-title">Subjects</div>
-        <div class="nav-item" onclick="switchSubject('Biology', this)"><span>🧬</span> Biology</div>
-        <div class="nav-item" onclick="switchSubject('Chemistry', this)"><span>⚗️</span> Chemistry</div>
-        <div class="nav-item" onclick="switchSubject('Computer', this)"><span>💻</span> Computer</div>
-        <div class="nav-item" onclick="switchSubject('Geography', this)"><span>🌍</span> Geography</div>
-        <div class="nav-item" onclick="switchSubject('History', this)"><span>📜</span> History</div>
-        <div class="nav-item active" onclick="switchSubject('Mathematics', this)"><span>📐</span> Mathematics</div>
-        <div class="nav-item" onclick="switchSubject('Physics', this)"><span>⚛️</span> Physics</div>
-
-        <div class="footer-note">
-            AI-Powered Study Platform<br>Learn Smarter, Not Harder
-        </div>
+        <div class="logo">Beast Study Hub</div>
+        <div class="nav-item" onclick="switchSubject('Biology', this)">🧬 Biology</div>
+        <div class="nav-item" onclick="switchSubject('Chemistry', this)">⚗️ Chemistry</div>
+        <div class="nav-item" onclick="switchSubject('Computer', this)">💻 Computer</div>
+        <div class="nav-item" onclick="switchSubject('History', this)">📜 History</div>
+        <div class="nav-item active" onclick="switchSubject('Mathematics', this)">📐 Mathematics</div>
+        <div class="nav-item" onclick="switchSubject('Physics', this)">⚛️ Physics</div>
     </aside>
 
     <main class="main-content">
-        <div class="header">
-            <h1 id="page-title">Mathematics Configuration</h1>
-        </div>
+        <h1 id="page-title" style="margin-bottom: 20px;">Mathematics Configuration</h1>
 
         <div class="card" id="setup-card">
-            <div class="setup-header">
-                <span>⚠️</span>
-                <div>
-                    <strong>Exam Setup Required</strong><br>
-                    Select the chapters you want to include in your SAT test.
-                </div>
-            </div>
-
-            <label for="chapter-select">Select Chapters (Hold Ctrl/Cmd to select multiple):</label>
+            <label>Select Chapters (from GitHub Vault):</label>
             <select id="chapter-select" multiple size="4">
-                <option value="all" selected>All Available Chapters</option>
-                <option value="chapter_1.pdf">Chapter 1</option>
-                <option value="chapter_2.pdf">Chapter 2</option>
-                <option value="chapter_3.pdf">Chapter 3</option>
+                <option value="all" selected>Loading your files...</option>
             </select>
-
-            <button id="generate-btn" onclick="generate()">Launch Exam Engine</button>
+            <button id="generate-btn" class="btn-primary" onclick="generate()">Launch Exam Engine</button>
         </div>
 
         <div class="card" id="test-card" style="display: none;">
-            <h2 style="margin-bottom: 20px; color: var(--primary);" id="exam-title">Mathematics SAT</h2>
+            <h2 id="exam-title" style="color: var(--primary); margin-bottom: 20px;">Mathematics SAT</h2>
             <div id="test-area"></div>
         </div>
     </main>
@@ -117,50 +80,95 @@
     <script>
         let currentSubject = "Mathematics";
 
-        // Handle Sidebar Switching
+        // Fetches real files from your GitHub folders dynamically
+        async function fetchChapters(subject) {
+            const select = document.getElementById('chapter-select');
+            select.innerHTML = '<option value="all">Fetching from GitHub...</option>';
+            try {
+                const res = await fetch('/api/generate_test', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'get_chapters', subject: subject })
+                });
+                const data = await res.json();
+                
+                if (data.chapters && data.chapters.length > 0) {
+                    select.innerHTML = '<option value="all" selected>All Available Chapters</option>';
+                    data.chapters.forEach(file => {
+                        select.innerHTML += `<option value="${file}">${file.replace('.pdf', '')}</option>`;
+                    });
+                } else {
+                    select.innerHTML = '<option disabled>No PDFs found in this folder</option>';
+                }
+            } catch (err) {
+                select.innerHTML = '<option value="all">Failed to load files (API Error)</option>';
+            }
+        }
+
+        // Run on first load
+        window.onload = () => fetchChapters(currentSubject);
+
         function switchSubject(subject, element) {
             currentSubject = subject;
-            
-            // Update Active Class
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
             
-            // Update Headers
             document.getElementById('page-title').innerText = subject + " Configuration";
             document.getElementById('exam-title').innerText = subject + " SAT";
-            
-            // Reset Test Area
             document.getElementById('test-card').style.display = 'none';
-            document.getElementById('test-area').innerHTML = '';
+            
+            fetchChapters(subject);
         }
 
-        // Generate Exam Logic
+        function selectOption(btn, groupIndex) {
+            // Remove 'selected' class from all buttons in this specific question's grid
+            const grid = btn.parentElement;
+            grid.querySelectorAll('.mcq-btn').forEach(b => b.classList.remove('selected'));
+            // Add 'selected' to the clicked one
+            btn.classList.add('selected');
+        }
+
         async function generate() {
             const btn = document.getElementById('generate-btn');
             const testCard = document.getElementById('test-card');
             const testArea = document.getElementById('test-area');
-            
             const chapters = Array.from(document.getElementById('chapter-select').selectedOptions).map(o => o.value);
             
-            btn.innerText = "Analyzing Textbooks...";
+            btn.innerText = "GPT-4o Generating (Can take 30+ seconds)...";
             btn.disabled = true;
             testCard.style.display = 'block';
-            testArea.innerHTML = "<p style='color: var(--text-light);'>Booting gpt-4o engine. Extracting data from GitHub vault. Please wait...</p>";
+            testArea.innerHTML = "<p>Reading textbooks and writing strict exam. Please hold...</p>";
             
             try {
                 const res = await fetch('/api/generate_test', {
                     method: 'POST',
-                    body: JSON.stringify({ subject: currentSubject, chapters })
+                    body: JSON.stringify({ action: 'generate', subject: currentSubject, chapters })
                 });
-                
                 const data = await res.json();
                 
                 let html = "";
                 data.questions.forEach((item, i) => {
                     html += `
                     <div class="q-box">
-                        <div class="q-text">Q${i+1}. ${item.q}</div>
-                        <textarea placeholder="Write your formulas and working steps here..."></textarea>
+                        <div class="q-header">
+                            <div class="q-text">Q${i+1}. ${item.q}</div>
+                            <div class="q-marks">[${item.marks} ${item.marks === 1 ? 'Mark' : 'Marks'}]</div>
+                        </div>`;
+                    
+                    // Render 4 clickable options if MCQ
+                    if (item.type === 'mcq' && item.options) {
+                        html += `<div class="options-grid">`;
+                        item.options.forEach((opt) => {
+                            html += `<button class="mcq-btn" onclick="selectOption(this, ${i})">${opt}</button>`;
+                        });
+                        html += `</div>`;
+                    }
+                    
+                    // Render free-space textarea for subjective questions OR if subject is Mathematics
+                    if (item.type === 'subjective' || currentSubject === 'Mathematics') {
+                        html += `<textarea placeholder="${currentSubject === 'Mathematics' ? 'Free space for formulas and working steps...' : 'Write your detailed descriptive answer here...'}"></textarea>`;
+                    }
+                    
+                    html += `
                         <br>
                         <button class="ans-btn" onclick="document.getElementById('ans-${i}').style.display='block'">Verify Answer</button>
                         <div class="ans-key" id="ans-${i}"><b>AI Solution:</b><br>${item.a}</div>
@@ -168,7 +176,7 @@
                 });
                 testArea.innerHTML = html;
             } catch (error) {
-                testArea.innerHTML = `<p style="color: red;">Error connecting to API. Check Vercel logs.</p>`;
+                testArea.innerHTML = `<p style="color: red;">Vercel Timeout or API Error. Try selecting fewer chapters.</p>`;
             }
             
             btn.innerText = "Launch Exam Engine";
