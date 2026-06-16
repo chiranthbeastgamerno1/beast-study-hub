@@ -53,7 +53,7 @@ class handler(BaseHTTPRequestHandler):
             # Connect to Groq API
             api_key = os.environ.get("GROQ_API_KEY")
             if not api_key:
-                raise ValueError("GROQ_API_KEY missing from Vercel.")
+                raise ValueError("GROQ_API_KEY missing from Vercel Environment Variables.")
             
             client = OpenAI(
                 base_url="https://api.groq.com/openai/v1", 
@@ -70,9 +70,9 @@ class handler(BaseHTTPRequestHandler):
 
             prompt = f"Subject: {subject.capitalize()}.\nRules: {system_rule}\nExtract all context ONLY from this text: {book_text[:15000]}.\nOutput JSON matching this exact structure: {json_format}"
                 
-            # Using Meta's massive Llama 3 model
+            # Using Groq's brand new, active Llama 3.3 model
             response = client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama-3.3-70b-versatile",
                 response_format={ "type": "json_object" },
                 messages=[
                     {"role": "system", "content": "You are a precise ICSE examiner. Follow JSON format perfectly."},
