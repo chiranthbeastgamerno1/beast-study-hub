@@ -13,18 +13,25 @@ class handler(BaseHTTPRequestHandler):
             request_body = json.loads(post_data)
             
             action = request_body.get('action', 'generate')
-            subject = request_body.get('subject', 'Mathematics').lower()
+            # Force strictly lowercase to match your newly updated GitHub folders
+            subject = request_body.get('subject', 'mathematics').lower()
             
-            # Mathematically locate the data folder
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            base_dir = os.path.dirname(current_dir) 
-            subject_dir = os.path.join(base_dir, 'data', subject)
+            # BULLETPROOF VERCEL PATHING
+            # Vercel sometimes runs from the root, sometimes from the api folder. We check both.
+            project_root = os.getcwd()
+            subject_dir = os.path.join(project_root, 'data', subject)
+            
+            if not os.path.exists(subject_dir):
+                # Fallback: look one folder up
+                subject_dir = os.path.join(project_root, '..', 'data', subject)
             
             # ACTION 1: Dynamic Chapter Fetching
             if action == 'get_chapters':
                 chapters = []
                 if os.path.exists(subject_dir):
                     chapters = [f for f in os.listdir(subject_dir) if f.endswith(".pdf")]
+                else:
+                    print(f"DEBUG: Could not locate path: {subject_dir}")
                 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
@@ -42,13 +49,19 @@ class handler(BaseHTTPRequestHandler):
                     if 'all' in selected_chapters or filename in selected_chapters:
                         if filename.endswith(".pdf"):
                             try:
-                                reader = PdfReader(os.path.join(subject_dir, filename))
+                                pdf_path = os.path.join(subject_dir, filename)
+                                reader = PdfReader(pdf_path)
                                 for page in reader.pages:
                                     extracted = page.extract_text()
                                     if extracted:
                                         book_text += extracted + "\n"
                             except Exception as pdf_err:
                                 print(f"Error reading {filename}: {pdf_err}")
+            else:
+                raise FileNotFoundError(f"Vercel Server could not locate the folder: {subject_dir}. Double check vercel.json is in your repo.")
+
+            if not book_text.strip():
+                raise ValueError(f"Found the folder, but could not read any text from the PDFs in {subject}.")
 
             # Connect to Groq API
             api_key = os.environ.get("GROQ_API_KEY")
@@ -70,7 +83,7 @@ class handler(BaseHTTPRequestHandler):
 
             prompt = f"Subject: {subject.capitalize()}.\nRules: {system_rule}\nExtract all context ONLY from this text: {book_text[:15000]}.\nOutput JSON matching this exact structure: {json_format}"
                 
-            # Using Groq's brand new, active Llama 3.3 model
+            # Using Groq's active Llama 3.3 model
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 response_format={ "type": "json_object" },
