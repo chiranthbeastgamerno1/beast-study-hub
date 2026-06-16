@@ -4,135 +4,176 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Beast Study Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Smooth transitions for the sidebar */
-        #sidebar { transition: width 0.3s ease; }
-        .sidebar-closed { width: 0px !important; overflow: hidden; }
+        :root {
+            --sidebar-bg: #2e266f;
+            --sidebar-hover: #3f368a;
+            --bg-color: #f3f4f6;
+            --card-border: #e5e7eb;
+            --primary: #4f46e5;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { display: flex; height: 100vh; background-color: var(--bg-color); overflow: hidden; }
+
+        /* Sidebar Styling */
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: white; display: flex; flex-direction: column; padding: 20px 0; }
+        .logo { display: flex; align-items: center; padding: 0 20px 30px 20px; font-size: 20px; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .logo span { font-size: 28px; margin-right: 10px; }
+        .nav-title { font-size: 12px; color: #a5b4fc; text-transform: uppercase; letter-spacing: 1px; padding: 0 20px; margin-bottom: 10px; }
+        
+        .nav-item { display: flex; align-items: center; padding: 12px 20px; margin: 4px 12px; border-radius: 8px; cursor: pointer; transition: all 0.2s; color: #e0e7ff; }
+        .nav-item:hover { background-color: var(--sidebar-hover); }
+        .nav-item.active { background-color: white; color: var(--sidebar-bg); font-weight: 600; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .nav-item span { margin-right: 12px; font-size: 18px; }
+
+        .footer-note { margin-top: auto; padding: 20px; font-size: 12px; color: #a5b4fc; text-align: center; }
+
+        /* Main Content Styling */
+        .main-content { flex: 1; overflow-y: auto; padding: 40px; }
+        .header { margin-bottom: 30px; }
+        .header h1 { color: var(--text-dark); font-size: 28px; }
+
+        /* Cards */
+        .card { background: white; border: 1px solid var(--card-border); border-radius: 12px; padding: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 24px; }
+        .setup-header { background: #fffbeb; border: 1px solid #fde68a; padding: 15px 20px; border-radius: 8px; margin-bottom: 25px; display: flex; align-items: center; color: #92400e; }
+        .setup-header span { font-size: 24px; margin-right: 15px; }
+
+        /* Form Elements */
+        label { display: block; font-weight: 600; color: var(--text-dark); margin-bottom: 10px; }
+        select { width: 100%; padding: 12px; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 20px; outline: none; }
+        button { background-color: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s; font-size: 16px; }
+        button:hover { background-color: #4338ca; }
+        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
+
+        /* Test Area */
+        .q-box { border-top: 1px solid var(--card-border); padding-top: 25px; margin-top: 25px; }
+        .q-text { font-size: 18px; color: var(--text-dark); margin-bottom: 15px; font-weight: 500; }
+        textarea { width: 100%; height: 150px; padding: 15px; border: 2px solid #e5e7eb; border-radius: 8px; font-family: monospace; font-size: 15px; resize: vertical; margin-bottom: 15px; outline-color: var(--primary); background: #f9fafb; }
+        
+        .ans-btn { background-color: #f3f4f6; color: var(--text-dark); border: 1px solid var(--card-border); }
+        .ans-btn:hover { background-color: #e5e7eb; }
+        .ans-key { display: none; margin-top: 15px; padding: 15px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; color: #065f46; line-height: 1.5; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans flex h-screen overflow-hidden">
+<body>
 
-    <div id="sidebar" class="w-64 bg-white border-r border-gray-200 shadow-lg flex-shrink-0">
-        <div class="p-6">
-            <h1 class="text-2xl font-extrabold tracking-wide text-blue-600 mb-6">BEAST HUB</h1>
-            <nav class="space-y-2">
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Computer</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Physics</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Biology</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Chemistry</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">History</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">English 1</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">English 2</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Mathematics</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Kannada</button>
-                <button class="w-full text-left font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg">Geography</button>
-            </nav>
-        </div>
-    </div>
-
-    <div class="flex-1 flex flex-col w-full">
-        
-        <header class="h-16 flex items-center justify-between px-6 bg-white border-b border-gray-200 shadow-sm">
-            <button id="menu-btn" class="p-2 text-gray-600 hover:text-blue-600 focus:outline-none">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-            </button>
-
-            <div class="flex space-x-2 bg-gray-100 p-1 rounded-lg border border-gray-200">
-                <button id="sat-btn" class="px-5 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white shadow">
-                    SAT (25 Marks)
-                </button>
-                <button id="tat-btn" class="px-5 py-1.5 rounded-md text-sm font-bold text-gray-600 hover:text-gray-900">
-                    TAT (80 Marks)
-                </button>
+    <aside class="sidebar">
+        <div class="logo">
+            <span>🦁</span>
+            <div>
+                <div>Beast Study</div>
+                <div style="font-size: 12px; font-weight: normal; color: #a5b4fc;">Hub</div>
             </div>
-        </header>
+        </div>
+        <div class="nav-title">Subjects</div>
+        <div class="nav-item" onclick="switchSubject('Biology', this)"><span>🧬</span> Biology</div>
+        <div class="nav-item" onclick="switchSubject('Chemistry', this)"><span>⚗️</span> Chemistry</div>
+        <div class="nav-item" onclick="switchSubject('Computer', this)"><span>💻</span> Computer</div>
+        <div class="nav-item" onclick="switchSubject('Geography', this)"><span>🌍</span> Geography</div>
+        <div class="nav-item" onclick="switchSubject('History', this)"><span>📜</span> History</div>
+        <div class="nav-item active" onclick="switchSubject('Mathematics', this)"><span>📐</span> Mathematics</div>
+        <div class="nav-item" onclick="switchSubject('Physics', this)"><span>⚛️</span> Physics</div>
 
-        <main class="flex-1 overflow-y-auto p-10 bg-gray-50">
-            <div class="max-w-5xl mx-auto">
-                <div class="bg-white border border-gray-200 p-10 rounded-2xl shadow-sm">
-                    <h2 class="text-3xl font-bold text-gray-800 mb-6" id="status-title">Select a subject to begin.</h2>
-                    <p class="text-gray-600 text-lg leading-relaxed mb-8" id="intro-text">
-                        Your custom test questions will generate here based on the files in your data folder.
-                    </p>
-                    
-                    <div id="question-area" class="space-y-4"></div>
+        <div class="footer-note">
+            AI-Powered Study Platform<br>Learn Smarter, Not Harder
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <h1 id="page-title">Mathematics Configuration</h1>
+        </div>
+
+        <div class="card" id="setup-card">
+            <div class="setup-header">
+                <span>⚠️</span>
+                <div>
+                    <strong>Exam Setup Required</strong><br>
+                    Select the chapters you want to include in your SAT test.
                 </div>
             </div>
-        </main>
-    </div>
+
+            <label for="chapter-select">Select Chapters (Hold Ctrl/Cmd to select multiple):</label>
+            <select id="chapter-select" multiple size="4">
+                <option value="all" selected>All Available Chapters</option>
+                <option value="chapter_1.pdf">Chapter 1</option>
+                <option value="chapter_2.pdf">Chapter 2</option>
+                <option value="chapter_3.pdf">Chapter 3</option>
+            </select>
+
+            <button id="generate-btn" onclick="generate()">Launch Exam Engine</button>
+        </div>
+
+        <div class="card" id="test-card" style="display: none;">
+            <h2 style="margin-bottom: 20px; color: var(--primary);" id="exam-title">Mathematics SAT</h2>
+            <div id="test-area"></div>
+        </div>
+    </main>
 
     <script>
-        // Toggle Sidebar
-        const sidebar = document.getElementById('sidebar');
-        const menuBtn = document.getElementById('menu-btn');
-        menuBtn.addEventListener('click', () => { sidebar.classList.toggle('sidebar-closed'); });
+        let currentSubject = "Mathematics";
 
-        // Toggle Test Buttons
-        let currentTestType = 'SAT';
-        const satBtn = document.getElementById('sat-btn');
-        const tatBtn = document.getElementById('tat-btn');
+        // Handle Sidebar Switching
+        function switchSubject(subject, element) {
+            currentSubject = subject;
+            
+            // Update Active Class
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Update Headers
+            document.getElementById('page-title').innerText = subject + " Configuration";
+            document.getElementById('exam-title').innerText = subject + " SAT";
+            
+            // Reset Test Area
+            document.getElementById('test-card').style.display = 'none';
+            document.getElementById('test-area').innerHTML = '';
+        }
 
-        satBtn.addEventListener('click', () => {
-            currentTestType = 'SAT';
-            satBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white shadow";
-            tatBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold text-gray-600 hover:text-gray-900";
-        });
-
-        tatBtn.addEventListener('click', () => {
-            currentTestType = 'TAT';
-            tatBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold bg-blue-600 text-white shadow";
-            satBtn.className = "px-5 py-1.5 rounded-md text-sm font-bold text-gray-600 hover:text-gray-900";
-        });
-
-        // Trigger AI when you click a subject
-        const subjectButtons = document.querySelectorAll('nav button');
-        const questionArea = document.getElementById('question-area');
-        const statusTitle = document.getElementById('status-title');
-        const introText = document.getElementById('intro-text');
-
-        subjectButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const subject = button.innerText;
-                statusTitle.innerText = `Generating ${subject} ${currentTestType} Exam...`;
-                introText.style.display = 'none'; // Hide the intro text
-                questionArea.innerHTML = `<p class="text-blue-600 font-bold text-lg animate-pulse">Communicating with AI, please wait...</p>`;
-
-                try {
-                    // Send request to Python backend
-                    const response = await fetch('/api/generate_test', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ subject: subject, type: currentTestType })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    // Clear loading text and display real questions
-                    statusTitle.innerText = `${subject} Test Ready`;
-                    questionArea.innerHTML = ''; 
-                    
-                    data.questions.forEach((item, index) => {
-                        // We use a small hack to pass the AI's explanation safely into the button click
-                        const encodedExplanation = encodeURIComponent(item.a);
-                        
-                        questionArea.innerHTML += `
-                        <div class="p-6 bg-blue-50 rounded-xl border border-blue-100 flex justify-between items-start">
-                            <p class="text-xl font-medium text-gray-800 w-3/4">
-                                ${index + 1}. ${item.q}
-                            </p>
-                            <button onclick="alert(decodeURIComponent('${encodedExplanation}'))" class="bg-blue-100 text-blue-700 font-bold py-2 px-6 rounded-lg hover:bg-blue-200 border border-blue-200 transition-colors">
-                                Explain AI
-                            </button>
-                        </div>`;
-                    });
-                } catch (error) {
-                    questionArea.innerHTML = `<p class="text-red-600 font-bold">Error loading AI. Make sure your Python backend is connected and your API key is set in Vercel.</p>`;
-                }
-            });
-        });
+        // Generate Exam Logic
+        async function generate() {
+            const btn = document.getElementById('generate-btn');
+            const testCard = document.getElementById('test-card');
+            const testArea = document.getElementById('test-area');
+            
+            const chapters = Array.from(document.getElementById('chapter-select').selectedOptions).map(o => o.value);
+            
+            btn.innerText = "Analyzing Textbooks...";
+            btn.disabled = true;
+            testCard.style.display = 'block';
+            testArea.innerHTML = "<p style='color: var(--text-light);'>Booting gpt-4o engine. Extracting data from GitHub vault. Please wait...</p>";
+            
+            try {
+                const res = await fetch('/api/generate_test', {
+                    method: 'POST',
+                    body: JSON.stringify({ subject: currentSubject, chapters })
+                });
+                
+                const data = await res.json();
+                
+                let html = "";
+                data.questions.forEach((item, i) => {
+                    html += `
+                    <div class="q-box">
+                        <div class="q-text">Q${i+1}. ${item.q}</div>
+                        <textarea placeholder="Write your formulas and working steps here..."></textarea>
+                        <br>
+                        <button class="ans-btn" onclick="document.getElementById('ans-${i}').style.display='block'">Verify Answer</button>
+                        <div class="ans-key" id="ans-${i}"><b>AI Solution:</b><br>${item.a}</div>
+                    </div>`;
+                });
+                testArea.innerHTML = html;
+            } catch (error) {
+                testArea.innerHTML = `<p style="color: red;">Error connecting to API. Check Vercel logs.</p>`;
+            }
+            
+            btn.innerText = "Launch Exam Engine";
+            btn.disabled = false;
+        }
     </script>
 </body>
 </html>
