@@ -55,6 +55,7 @@
         <div class="nav-item" onclick="switchSubject('Biology', this)">🧬 Biology</div>
         <div class="nav-item" onclick="switchSubject('Chemistry', this)">⚗️ Chemistry</div>
         <div class="nav-item" onclick="switchSubject('Computer', this)">💻 Computer</div>
+        <div class="nav-item" onclick="switchSubject('Geography', this)">🌍 Geography</div>
         <div class="nav-item" onclick="switchSubject('History', this)">📜 History</div>
         <div class="nav-item active" onclick="switchSubject('Mathematics', this)">📐 Mathematics</div>
         <div class="nav-item" onclick="switchSubject('Physics', this)">⚛️ Physics</div>
@@ -80,7 +81,6 @@
     <script>
         let currentSubject = "Mathematics";
 
-        // Fetches real files from your GitHub folders dynamically
         async function fetchChapters(subject) {
             const select = document.getElementById('chapter-select');
             select.innerHTML = '<option value="all">Fetching from GitHub...</option>';
@@ -104,7 +104,6 @@
             }
         }
 
-        // Run on first load
         window.onload = () => fetchChapters(currentSubject);
 
         function switchSubject(subject, element) {
@@ -119,11 +118,9 @@
             fetchChapters(subject);
         }
 
-        function selectOption(btn, groupIndex) {
-            // Remove 'selected' class from all buttons in this specific question's grid
+        function selectOption(btn) {
             const grid = btn.parentElement;
             grid.querySelectorAll('.mcq-btn').forEach(b => b.classList.remove('selected'));
-            // Add 'selected' to the clicked one
             btn.classList.add('selected');
         }
 
@@ -133,7 +130,7 @@
             const testArea = document.getElementById('test-area');
             const chapters = Array.from(document.getElementById('chapter-select').selectedOptions).map(o => o.value);
             
-            btn.innerText = "GPT-4o Generating (Can take 30+ seconds)...";
+            btn.innerText = "Groq Engine Generating...";
             btn.disabled = true;
             testCard.style.display = 'block';
             testArea.innerHTML = "<p>Reading textbooks and writing strict exam. Please hold...</p>";
@@ -154,16 +151,14 @@
                             <div class="q-marks">[${item.marks} ${item.marks === 1 ? 'Mark' : 'Marks'}]</div>
                         </div>`;
                     
-                    // Render 4 clickable options if MCQ
                     if (item.type === 'mcq' && item.options) {
                         html += `<div class="options-grid">`;
                         item.options.forEach((opt) => {
-                            html += `<button class="mcq-btn" onclick="selectOption(this, ${i})">${opt}</button>`;
+                            html += `<button class="mcq-btn" onclick="selectOption(this)">${opt}</button>`;
                         });
                         html += `</div>`;
                     }
                     
-                    // Render free-space textarea for subjective questions OR if subject is Mathematics
                     if (item.type === 'subjective' || currentSubject === 'Mathematics') {
                         html += `<textarea placeholder="${currentSubject === 'Mathematics' ? 'Free space for formulas and working steps...' : 'Write your detailed descriptive answer here...'}"></textarea>`;
                     }
@@ -176,7 +171,7 @@
                 });
                 testArea.innerHTML = html;
             } catch (error) {
-                testArea.innerHTML = `<p style="color: red;">Vercel Timeout or API Error. Try selecting fewer chapters.</p>`;
+                testArea.innerHTML = `<p style="color: red;">API Error. Check backend logs.</p>`;
             }
             
             btn.innerText = "Launch Exam Engine";
