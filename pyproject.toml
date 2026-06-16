@@ -1,2 +1,11 @@
+[project]
+name = "beast-study-hub"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "openai",
+    "PyMuPDF"
+]
+
 [tool.vercel]
 entrypoint = "api.generate_test:handler"
