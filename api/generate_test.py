@@ -50,13 +50,17 @@ class handler(BaseHTTPRequestHandler):
                             except Exception as pdf_err:
                                 print(f"Error reading {filename}: {pdf_err}")
 
-            api_key = os.environ.get("OPENROUTER_API_KEY")
+            # Connect to Groq API
+            api_key = os.environ.get("GROQ_API_KEY")
             if not api_key:
-                raise ValueError("OPENROUTER_API_KEY missing from Vercel.")
+                raise ValueError("GROQ_API_KEY missing from Vercel.")
             
-            client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=api_key)
+            client = OpenAI(
+                base_url="https://api.groq.com/openai/v1", 
+                api_key=api_key
+            )
             
-            # Apply your strict rules based on subject
+            # Apply strict grading rules
             if subject == 'mathematics':
                 system_rule = "Create exactly 25 Multiple Choice Questions (MCQ). Total 25 marks. Each question is worth 1 mark. Every question MUST have exactly 4 options."
                 json_format = """{"questions": [{"type": "mcq", "marks": 1, "q": "Question text?", "options": ["A. ...", "B. ...", "C. ...", "D. ..."], "a": "Correct Option + Explanation"}]}"""
@@ -64,10 +68,11 @@ class handler(BaseHTTPRequestHandler):
                 system_rule = "Total 25 marks. Section A: 5 Multiple Choice Questions (MCQ) worth 1 mark each. Every MCQ MUST have exactly 4 options. Section B: Subjective/Descriptive questions totaling exactly 20 marks (e.g., four 5-mark questions or five 4-mark questions)."
                 json_format = """{"questions": [{"type": "mcq", "marks": 1, "q": "Question text?", "options": ["A. ...", "B. ...", "C. ...", "D. ..."], "a": "Correct Option + Explanation"}, {"type": "subjective", "marks": 5, "q": "Question text?", "a": "Detailed Answer"}]}"""
 
-            prompt = f"Subject: {subject.capitalize()}.\nRules: {system_rule}\nExtract all context ONLY from this text: {book_text[:20000]}.\nOutput JSON matching this exact structure: {json_format}"
+            prompt = f"Subject: {subject.capitalize()}.\nRules: {system_rule}\nExtract all context ONLY from this text: {book_text[:15000]}.\nOutput JSON matching this exact structure: {json_format}"
                 
+            # Using Meta's massive Llama 3 model
             response = client.chat.completions.create(
-                model="openai/gpt-4o",
+                model="llama3-70b-8192",
                 response_format={ "type": "json_object" },
                 messages=[
                     {"role": "system", "content": "You are a precise ICSE examiner. Follow JSON format perfectly."},
