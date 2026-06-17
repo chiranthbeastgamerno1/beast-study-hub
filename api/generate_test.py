@@ -3,7 +3,7 @@ import os
 import traceback
 from http.server import BaseHTTPRequestHandler
 from openai import OpenAI
-import fitz  # The heavy-duty PyMuPDF engine
+from pdfminer.high_level import extract_text
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -33,7 +33,7 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"chapters": chapters}).encode('utf-8'))
                 return
 
-            # ACTION 2: The Reading Engine
+            # ACTION 2: The Pure Python Reading Engine
             selected_chapters = request_body.get('chapters', ['all'])
             clean_selected = [c.strip() for c in selected_chapters]
             
@@ -49,15 +49,13 @@ class handler(BaseHTTPRequestHandler):
                             diagnostic_log.append(f"[{filename}: {file_size} bytes]")
                             
                             try:
-                                doc = fitz.open(pdf_path)
-                                pages_with_text = 0
-                                for page in doc:
-                                    text = page.get_text()
-                                    if text.strip():  # If actual words exist on the page
-                                        book_text += text + "\n"
-                                        pages_with_text += 1
-                                doc.close()
-                                diagnostic_log.append(f"[Readable Pages: {pages_with_text}/{len(doc)}]")
+                                # Vercel-safe PDF extraction
+                                extracted = extract_text(pdf_path)
+                                if extracted and extracted.strip():
+                                    book_text += extracted + "\n"
+                                    diagnostic_log.append("[Text Extracted Successfully]")
+                                else:
+                                    diagnostic_log.append("[Read 0 Words - This is a Scanned Image PDF]")
                             except Exception as pdf_err:
                                 diagnostic_log.append(f"[Read Error: {str(pdf_err)}]")
             else:
@@ -66,7 +64,7 @@ class handler(BaseHTTPRequestHandler):
             # THE DIAGNOSTIC CHECK
             if not book_text.strip():
                 log_str = " ".join(diagnostic_log)
-                raise ValueError(f"PDF extraction failed. Diagnostics: {log_str}. If 'Readable Pages' is 0, your textbook is a scanned image (pictures of pages), not a text document. The AI needs a text-based PDF to generate questions.")
+                raise ValueError(f"PDF extraction failed. Diagnostics: {log_str}. If it says 'Scanned Image PDF', your textbook is just photographs of pages. You must convert it using a free online OCR tool, or provide a text-based digital PDF.")
 
             # Connect to Groq API
             api_key = os.environ.get("GROQ_API_KEY")
