@@ -3,7 +3,7 @@ import os
 import traceback
 from http.server import BaseHTTPRequestHandler
 from openai import OpenAI
-from pypdf import PdfReader
+import fitz  # The heavy-duty PyMuPDF engine
 
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -13,16 +13,12 @@ class handler(BaseHTTPRequestHandler):
             request_body = json.loads(post_data)
             
             action = request_body.get('action', 'generate')
-            # Force strictly lowercase to match your newly updated GitHub folders
             subject = request_body.get('subject', 'mathematics').lower()
             
-            # BULLETPROOF VERCEL PATHING
-            # Vercel sometimes runs from the root, sometimes from the api folder. We check both.
+            # Bulletproof Vercel Folder Pathing
             project_root = os.getcwd()
             subject_dir = os.path.join(project_root, 'data', subject)
-            
             if not os.path.exists(subject_dir):
-                # Fallback: look one folder up
                 subject_dir = os.path.join(project_root, '..', 'data', subject)
             
             # ACTION 1: Dynamic Chapter Fetching
@@ -30,9 +26,6 @@ class handler(BaseHTTPRequestHandler):
                 chapters = []
                 if os.path.exists(subject_dir):
                     chapters = [f for f in os.listdir(subject_dir) if f.endswith(".pdf")]
-                else:
-                    print(f"DEBUG: Could not locate path: {subject_dir}")
-                
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
                 self.send_header('Access-Control-Allow-Origin', '*')
@@ -40,40 +33,52 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"chapters": chapters}).encode('utf-8'))
                 return
 
-            # ACTION 2: Generate the Test
+            # ACTION 2: The Reading Engine
             selected_chapters = request_body.get('chapters', ['all'])
+            clean_selected = [c.strip() for c in selected_chapters]
+            
             book_text = ""
+            diagnostic_log = []
             
             if os.path.exists(subject_dir):
                 for filename in os.listdir(subject_dir):
-                    if 'all' in selected_chapters or filename in selected_chapters:
+                    if 'all' in clean_selected or filename.strip() in clean_selected:
                         if filename.endswith(".pdf"):
+                            pdf_path = os.path.join(subject_dir, filename)
+                            file_size = os.path.getsize(pdf_path)
+                            diagnostic_log.append(f"[{filename}: {file_size} bytes]")
+                            
                             try:
-                                pdf_path = os.path.join(subject_dir, filename)
-                                reader = PdfReader(pdf_path)
-                                for page in reader.pages:
-                                    extracted = page.extract_text()
-                                    if extracted:
-                                        book_text += extracted + "\n"
+                                doc = fitz.open(pdf_path)
+                                pages_with_text = 0
+                                for page in doc:
+                                    text = page.get_text()
+                                    if text.strip():  # If actual words exist on the page
+                                        book_text += text + "\n"
+                                        pages_with_text += 1
+                                doc.close()
+                                diagnostic_log.append(f"[Readable Pages: {pages_with_text}/{len(doc)}]")
                             except Exception as pdf_err:
-                                print(f"Error reading {filename}: {pdf_err}")
+                                diagnostic_log.append(f"[Read Error: {str(pdf_err)}]")
             else:
-                raise FileNotFoundError(f"Vercel Server could not locate the folder: {subject_dir}. Double check vercel.json is in your repo.")
+                raise FileNotFoundError(f"Vercel Server could not locate the folder: {subject_dir}")
 
+            # THE DIAGNOSTIC CHECK
             if not book_text.strip():
-                raise ValueError(f"Found the folder, but could not read any text from the PDFs in {subject}.")
+                log_str = " ".join(diagnostic_log)
+                raise ValueError(f"PDF extraction failed. Diagnostics: {log_str}. If 'Readable Pages' is 0, your textbook is a scanned image (pictures of pages), not a text document. The AI needs a text-based PDF to generate questions.")
 
             # Connect to Groq API
             api_key = os.environ.get("GROQ_API_KEY")
             if not api_key:
-                raise ValueError("GROQ_API_KEY missing from Vercel Environment Variables.")
+                raise ValueError("GROQ_API_KEY missing from Vercel.")
             
             client = OpenAI(
                 base_url="https://api.groq.com/openai/v1", 
                 api_key=api_key
             )
             
-            # Apply strict grading rules
+            # Apply your strict grading rules
             if subject == 'mathematics':
                 system_rule = "Create exactly 25 Multiple Choice Questions (MCQ). Total 25 marks. Each question is worth 1 mark. Every question MUST have exactly 4 options."
                 json_format = """{"questions": [{"type": "mcq", "marks": 1, "q": "Question text?", "options": ["A. ...", "B. ...", "C. ...", "D. ..."], "a": "Correct Option + Explanation"}]}"""
@@ -83,7 +88,7 @@ class handler(BaseHTTPRequestHandler):
 
             prompt = f"Subject: {subject.capitalize()}.\nRules: {system_rule}\nExtract all context ONLY from this text: {book_text[:15000]}.\nOutput JSON matching this exact structure: {json_format}"
                 
-            # Using Groq's active Llama 3.3 model
+            # Groq Generation
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
                 response_format={ "type": "json_object" },
@@ -98,7 +103,7 @@ class handler(BaseHTTPRequestHandler):
             error_details = traceback.format_exc()
             print(error_details)
             ai_output = json.dumps({
-                "questions": [{"type": "error", "marks": 0, "q": f"Backend Crash: {str(e)}", "a": f"Logs:\n{error_details}"}]
+                "questions": [{"type": "error", "marks": 0, "q": f"System Alert: {str(e)}", "a": f"Backend Logs:\n{error_details}"}]
             })
         
         self.send_response(200)
